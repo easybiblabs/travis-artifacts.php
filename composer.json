@@ -1,6 +1,6 @@
 {
     "name": "easybib/travis-artifacts",
-    "description": "PHP port of https://github.com/travis/travis-artifacts",
+    "description": "PHP port of https://github.com/travis-ci/travis-artifacts",
     "license": "BSD-2-Clause",
     "autoload": {
         "psr-0": {
