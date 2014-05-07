@@ -31,6 +31,12 @@ class UploadCommand extends Command
                 Input\InputOption::VALUE_REQUIRED | Input\InputOption::VALUE_IS_ARRAY,
                 'Paths to upload from: --path foo --path bar --path foobar'
             )
+            ->addOption(
+                'root',
+                'r',
+                Input\InputOption::VALUE_OPTIONAL,
+                'Strip prefix from uploaded file'
+            )
         ;
     }
 
@@ -39,10 +45,12 @@ class UploadCommand extends Command
         $paths = $input->getOption('path');
         $target = $input->getOption('target-path');
         if (empty($target)) {
-            $target = 'artifacts/'; // default
+            $target = 'artifacts'; // default
         } else {
-            $target = rtrim($target, '/') . '/';
+            $target = rtrim($target, '/');
         }
+
+        $root = $input->getOption('root');
 
         $validator = new Validator();
         $validator->validatePaths($paths);
@@ -52,18 +60,19 @@ class UploadCommand extends Command
 
         $this->output->writeln("<info>Trying to start upload.</info>");
 
-        $this->upload($paths, $target);
+        $this->upload($paths, $target, $root);
     }
 
     /**
      * Upload files using the AWS PHP SDK.
      *
-     * @param array $paths
+     * @param array  $paths
      * @param string $target
+     * @param string $root
      *
      * @throws LogicException
      */
-    private function upload($paths, $target)
+    private function upload($paths, $target, $root)
     {
         $region = getenv('ARTIFACTS_AWS_REGION');
         if (empty($region)) {
@@ -77,7 +86,7 @@ class UploadCommand extends Command
             'secret' => getenv('ARTIFACTS_AWS_SECRET_ACCESS_KEY'),
         ]);
 
-        $uploader = new Uploader($s3, $this->output);
+        $uploader = new Uploader($s3, $this->output, $root);
         $uploader->doUpload($paths, $target);
 
 

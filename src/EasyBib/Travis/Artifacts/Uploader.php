@@ -13,6 +13,11 @@ class Uploader
     private $output;
 
     /**
+     * @var string
+     */
+    private $root;
+
+    /**
      * @var S3\S3Client
      */
     private $s3;
@@ -20,13 +25,15 @@ class Uploader
     /**
      * @param S3\S3Client            $s3
      * @param Output\OutputInterface $output
+     * @param string                 $root
      *
      * @return self
      */
-    public function __construct(S3\S3Client $s3, Output\OutputInterface $output)
+    public function __construct(S3\S3Client $s3, Output\OutputInterface $output, $root)
     {
         $this->s3 = $s3;
         $this->output = $output;
+        $this->root = $root;
     }
 
     /**
@@ -48,10 +55,15 @@ class Uploader
 
             /** @var Finder\SplFileInfo $file */
             foreach ($finder as $file) {
+
+                $key = $this->getKey($target, $file->getRealPath());
+                var_dump($key);
+                continue;
+
                 $this->s3->putObject([
                         'Acl' => 'private',
                         'Bucket' => getenv('ARTIFACTS_S3_BUCKET'),
-                        'Key' => $target . $path . $file->getRelativePathname(),
+                        'Key' => $target . $file->getAb(),
                         'SourceFile' => $file->getRealPath(),
                     ]);
                 $this->output->write(".");
@@ -59,5 +71,15 @@ class Uploader
 
             $this->output->writeln("");
         }
+    }
+
+    private function getKey($target, $absolutePathToFile)
+    {
+        $key = $target . $absolutePathToFile;
+        if (!empty($this->root)) {
+            $key = str_replace($this->root, '', $key);
+        }
+        $key = str_replace('//', '/', $key);
+        return $key;
     }
 }
