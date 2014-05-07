@@ -1,0 +1,15 @@
+{
+    "name": "easybib/travis-artifacts",
+    "description": "PHP port of https://github.com/travis/travis-artifacts",
+    "license": "BSD-2-Clause",
+    "autoload": {
+        "psr-0": {
+            "EasyBib": "src"
+        }
+    },
+    "require": {
+        "aws/aws-sdk-php": "~2.6.2",
+        "symfony/finder": "~2.4.0",
+        "symfony/console": "~2.4.0"
+    }
+}
