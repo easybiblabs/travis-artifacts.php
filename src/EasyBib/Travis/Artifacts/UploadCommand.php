@@ -45,9 +45,9 @@ class UploadCommand extends Command
         $paths = $input->getOption('path');
         $target = $input->getOption('target-path');
         if (empty($target)) {
-            $target = 'artifacts'; // default
+            $target = 'artifacts/'; // default
         } else {
-            $target = rtrim($target, '/');
+            $target = rtrim($target, '/') . '/';
         }
 
         $root = $input->getOption('root');
