@@ -6,7 +6,6 @@ use LogicException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Finder;
 
 class UploadCommand extends Command
 {
@@ -45,7 +44,9 @@ class UploadCommand extends Command
             $target = rtrim($target, '/') . '/';
         }
 
-        $this->checkSetUp($paths);
+        $validator = new Validator();
+        $validator->validatePaths($paths);
+        $validator->validateEnvironment();
 
         $this->output = $output;
 
@@ -55,38 +56,8 @@ class UploadCommand extends Command
     }
 
     /**
-     * Checks if environment variables are set and if paths and so on are valid.
-     *
-     * @throws LogicException
-     */
-    private function checkSetUp(array $paths)
-    {
-        foreach ($paths as $path) {
-            if (!file_exists($path) || !is_readable($path)) {
-                throw new LogicException("{$path} does not exist or is not readable.");
-            }
-        }
-
-        $envs = [
-            'ARTIFACTS_S3_BUCKET',
-            'ARTIFACTS_AWS_REGION', //us-east-1
-            'ARTIFACTS_AWS_ACCESS_KEY_ID',
-            'ARTIFACTS_AWS_SECRET_ACCESS_KEY',
-        ];
-
-        foreach ($envs as $env) {
-            if (false === getenv($env)) {
-                if ('ARTIFACTS_AWS_REGION' === $env) {
-                    continue;
-                }
-                throw new LogicException("$env environment variable is not set, but required.");
-            }
-        }
-    }
-
-    /**
      * Upload files using the AWS PHP SDK.
-     * 
+     *
      * @param array $paths
      * @param string $target
      *
@@ -106,27 +77,9 @@ class UploadCommand extends Command
             'secret' => getenv('ARTIFACTS_AWS_SECRET_ACCESS_KEY'),
         ]);
 
-        $finder = new Finder\Finder();
+        $uploader = new Uploader($s3, $this->output);
+        $uploader->doUpload($paths, $target);
 
-        foreach ($paths as $path) {
 
-            $path = rtrim($path, '/') . '/';
-            $this->output->writeln("<info>Trying to upload from: {$path}</info>");
-
-            $finder->files()->in($path);
-
-            /** @var Finder\SplFileInfo $file */
-            foreach ($finder as $file) {
-                $s3->putObject([
-                    'Acl' => 'private',
-                    'Bucket' => getenv('ARTIFACTS_S3_BUCKET'),
-                    'Key' => $target . $path . $file->getRelativePathname(),
-                    'SourceFile' => $file->getRealPath(),
-                ]);
-                $this->output->write(".");
-            }
-
-            $this->output->writeln("");
-        }
     }
 }
