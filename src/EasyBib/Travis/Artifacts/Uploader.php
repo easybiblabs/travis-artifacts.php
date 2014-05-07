@@ -56,14 +56,12 @@ class Uploader
             /** @var Finder\SplFileInfo $file */
             foreach ($finder as $file) {
 
-                $key = $this->getKey($target, $file->getRealPath());
-                var_dump($key);
-                continue;
+                $objectKey = $this->getObjectKey($target, $file->getRealPath());
 
                 $this->s3->putObject([
                         'Acl' => 'private',
                         'Bucket' => getenv('ARTIFACTS_S3_BUCKET'),
-                        'Key' => $target . $file->getAb(),
+                        'Key' => $objectKey,
                         'SourceFile' => $file->getRealPath(),
                     ]);
                 $this->output->write(".");
@@ -73,7 +71,7 @@ class Uploader
         }
     }
 
-    private function getKey($target, $absolutePathToFile)
+    private function getObjectKey($target, $absolutePathToFile)
     {
         $key = $target . $absolutePathToFile;
         if (!empty($this->root)) {
