@@ -13,7 +13,7 @@ class Uploader
     private $output;
 
     /**
-     * @var string
+     * @var string Prepended for relative paths.
      */
     private $root;
 
@@ -29,7 +29,7 @@ class Uploader
      *
      * @return self
      */
-    public function __construct(S3\S3Client $s3, Output\OutputInterface $output, $root)
+    public function __construct(S3\S3Client $s3, Output\OutputInterface $output, $root = '')
     {
         $this->s3 = $s3;
         $this->output = $output;
@@ -56,7 +56,7 @@ class Uploader
             /** @var Finder\SplFileInfo $file */
             foreach ($finder as $file) {
 
-                $objectKey = $this->getObjectKey($target, $file->getRealPath());
+                $objectKey = $this->getObjectKey($target, $file->getRelativePathname());
 
                 $this->s3->putObject([
                         'Acl' => 'private',
@@ -71,12 +71,14 @@ class Uploader
         }
     }
 
-    private function getObjectKey($target, $absolutePathToFile)
+    private function getObjectKey($target, $relativePathToFile)
     {
-        $key = $target . $absolutePathToFile;
+        $key = $target . $relativePathToFile;
         if (!empty($this->root)) {
-            $key = str_replace($this->root, '', $key);
+            $key = $this->root . $key;
         }
+
+        // strip to make sure
         $key = str_replace('//', '/', $key);
         return $key;
     }
