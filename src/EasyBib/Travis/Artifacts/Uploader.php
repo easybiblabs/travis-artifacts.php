@@ -75,6 +75,4 @@ class Uploader
             $this->output->writeln("");
         }
     }
-
-
 }
