@@ -58,7 +58,7 @@ class Uploader
             foreach ($finder as $file) {
 
                 $objectKey = $handler->transform($target, $file->getRelativePathname());
-                var_dump($objectKey);
+                //var_dump($objectKey);
 
                 $result = $this->s3->putObject([
                     'Acl' => 'private',
@@ -67,7 +67,7 @@ class Uploader
                     'SourceFile' => $file->getRealPath(),
                 ]);
 
-                var_dump($result->toArray());
+                //var_dump($result->toArray()['ObjectURL']);
 
                 $this->output->write(".");
             }
