@@ -45,8 +45,9 @@ class Uploader
     public function doUpload(array $paths, $target)
     {
         $finder = new Finder\Finder();
+        $handler = new PathHandler($this->root, $paths);
 
-        foreach ($paths as $path) {
+        foreach ($handler->getPaths() as $path) {
 
             $path = rtrim($path, '/') . '/';
             $this->output->writeln("<info>Trying to upload from: {$path}</info>");
@@ -56,14 +57,18 @@ class Uploader
             /** @var Finder\SplFileInfo $file */
             foreach ($finder as $file) {
 
-                $objectKey = $this->getObjectKey($target, $file->getRelativePathname());
+                $objectKey = $handler->transform($target, $file->getRelativePathname());
+                var_dump($objectKey);
 
-                $this->s3->putObject([
-                        'Acl' => 'private',
-                        'Bucket' => getenv('ARTIFACTS_S3_BUCKET'),
-                        'Key' => $objectKey,
-                        'SourceFile' => $file->getRealPath(),
-                    ]);
+                $result = $this->s3->putObject([
+                    'Acl' => 'private',
+                    'Bucket' => getenv('ARTIFACTS_S3_BUCKET'),
+                    'Key' => $objectKey,
+                    'SourceFile' => $file->getRealPath(),
+                ]);
+
+                var_dump($result->toArray());
+
                 $this->output->write(".");
             }
 
@@ -71,15 +76,5 @@ class Uploader
         }
     }
 
-    private function getObjectKey($target, $relativePathToFile)
-    {
-        $key = $target . $relativePathToFile;
-        if (!empty($this->root)) {
-            $key = $this->root . $key;
-        }
 
-        // strip to make sure
-        $key = str_replace('//', '/', $key);
-        return $key;
-    }
 }
