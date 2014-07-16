@@ -1,5 +1,5 @@
 #!/bin/bash
-RESULT_DIR=${TRAVIS_BUILD_DIR}/travis/artifacts
+RESULT_DIR=travis/artifacts
 
 export | grep TRAVIS
 
