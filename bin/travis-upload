@@ -16,6 +16,6 @@ git log -n1 > ${RESULT_DIR}/pr.txt
 TARGET_PATH_PREFIX=${TRAVIS_REPO_SLUG}/travis-ci/${TRAVIS_PULL_REQUEST}/${TRAVIS_BUILD_ID}
 UPLOAD=${TRAVIS_BUILD_DIR}/${RESULT_DIR}
 
-travis-artifacts upload --target-path=${TARGET_PATH_PREFIX} --path ${UPLOAD}
+${TRAVIS_BUILD_DIR}/vendor/bin/travis-artifacts upload --target-path=${TARGET_PATH_PREFIX} --path ${UPLOAD}
 
 echo "Travis Artifacts uploaded to /${TARGET_PATH_PREFIX}"
