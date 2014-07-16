@@ -8,7 +8,8 @@
         }
     },
     "bin": [
-        "bin/travis-artifacts"
+        "bin/travis-artifacts",
+        "bin/travis-upload"
     ],
     "require": {
         "aws/aws-sdk-php": "~2.6.2",
